@@ -190,19 +190,37 @@ button:hover {
   margin: 0;
 }
 
-#my-lists-items a {
-  display: block;
+#my-lists-items li {
+  display: flex;
+  align-items: center;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 12px;
   margin-bottom: 8px;
+}
+
+#my-lists-items li:hover {
+  border-color: var(--accent);
+}
+
+#my-lists-items a {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 12px;
   color: var(--text);
   text-decoration: none;
 }
 
-#my-lists-items a:hover {
-  border-color: var(--accent);
+.remove-list {
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.4rem;
+  padding: 8px 12px;
+}
+
+.remove-list:hover {
+  color: #c62828;
 }
 
 #sync h2 {
@@ -261,6 +279,21 @@ footer {
 .status {
   font-size: 0.8rem;
   color: var(--muted);
+}
+
+#delete-list-btn.danger {
+  display: block;
+  margin: 32px auto 0;
+  background: transparent;
+  color: #c62828;
+  border: 1px solid #c62828;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+}
+
+#delete-list-btn.danger:hover {
+  background: #c62828;
+  color: #fff;
 }
 
 .status.live {

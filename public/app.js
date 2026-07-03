@@ -91,7 +91,17 @@ function renderMyLists(lists) {
     const a = document.createElement("a");
     a.href = `/list/${l.id}`;
     a.textContent = l.name;
-    li.appendChild(a);
+
+    const rm = document.createElement("button");
+    rm.className = "remove-list";
+    rm.textContent = "×";
+    rm.title = "Aus Übersicht entfernen (Liste bleibt bestehen)";
+    rm.addEventListener("click", () => {
+      forgetList(l.id);
+      showHome();
+    });
+
+    li.append(a, rm);
     ul.appendChild(li);
   }
 }
@@ -241,6 +251,19 @@ $("#clear-btn").addEventListener("click", async () => {
   await fetch(`/api/lists/${state.listId}/items`, { method: "DELETE" });
 });
 
+$("#delete-list-btn").addEventListener("click", async () => {
+  const name = $("#list-name").textContent;
+  if (!confirm(`Liste „${name}" für alle löschen? Das kann nicht rückgängig gemacht werden.`)) return;
+  state.deleting = true;
+  const res = await fetch(`/api/lists/${state.listId}`, { method: "DELETE" });
+  if (!res.ok) {
+    state.deleting = false;
+    return alert("Löschen fehlgeschlagen.");
+  }
+  forgetList(state.listId);
+  location.href = "/";
+});
+
 $("#share-btn").addEventListener("click", async () => {
   await navigator.clipboard.writeText(location.href);
   $("#share-btn").textContent = "✓ Kopiert!";
@@ -276,6 +299,12 @@ function connectWebSocket() {
       case "list:cleared":
         state.items = state.items.filter((i) => !i.checked);
         break;
+      case "list:deleted":
+        if (state.deleting) break; // das löschende Gerät navigiert selbst
+        forgetList(state.listId);
+        alert("Diese Liste wurde gelöscht.");
+        location.href = "/";
+        return;
     }
     renderItems();
   });

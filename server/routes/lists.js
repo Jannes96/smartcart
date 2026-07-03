@@ -36,6 +36,15 @@ router.get("/:id", (req, res) => {
   res.json({ ...list, items });
 });
 
+// Liste endgültig löschen (Items und Profil-Verknüpfungen kaskadieren)
+router.delete("/:id", (req, res) => {
+  const list = getListOr404(req, res);
+  if (!list) return;
+  broadcast(list.id, { type: "list:deleted" });
+  db.prepare("DELETE FROM lists WHERE id = ?").run(list.id);
+  res.status(204).end();
+});
+
 // Item hinzufügen
 router.post("/:id/items", (req, res) => {
   const list = getListOr404(req, res);
