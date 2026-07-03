@@ -32,9 +32,40 @@ h1 {
 
 header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
   margin-bottom: 16px;
+}
+
+header h1 {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#back-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding-bottom: 3px; /* optische Zentrierung des ‹ */
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+#back-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 form {
