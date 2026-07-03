@@ -24,6 +24,11 @@
         <button type="submit">Liste erstellen</button>
       </form>
 
+      <form id="open-form">
+        <input id="open-code" type="text" placeholder="Listen-Code eingeben, z.B. k3v9x2mq" autocomplete="off" />
+        <button type="submit">Öffnen</button>
+      </form>
+
       <div id="my-lists" hidden>
         <h2>Deine Listen</h2>
         <ul id="my-lists-items"></ul>
@@ -32,7 +37,7 @@
       <div id="sync">
         <h2>Geräte-Sync</h2>
         <div id="sync-off" hidden>
-          <p>Zeige deine Listen auf allen Geräten: Erstelle einen Sync-Code und gib ihn auf dem anderen Gerät ein.</p>
+          <p>Zeige deine Listen auf allen <strong>eigenen</strong> Geräten: Erstelle einen Sync-Code und gib ihn auf dem anderen Gerät ein.</p>
           <button id="sync-create">Sync-Code erstellen</button>
           <form id="sync-join">
             <input id="sync-code-input" type="text" placeholder="Code eingeben, z.B. tiger-fluss-47" autocomplete="off" />
@@ -46,6 +51,7 @@
             <button id="sync-leave">Trennen</button>
           </div>
         </div>
+        <p>⚠️ Gib den Sync-Code nicht an andere weiter – er zeigt deine <em>gesamte</em> Übersicht. Um eine einzelne Liste zu teilen, nutze den Teilen-Button in der Liste.</p>
       </div>
     </section>
 
@@ -56,6 +62,8 @@
         <h1 id="list-name"></h1>
         <button id="share-btn" title="Link kopieren">🔗 Teilen</button>
       </header>
+
+      <p class="list-code">Code dieser Liste: <code id="list-code"></code> – Link teilen oder Code auf der Startseite eingeben.</p>
 
       <form id="add-form">
         <input id="add-name" type="text" placeholder="Was brauchst du?" autocomplete="off" required />

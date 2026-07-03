@@ -111,6 +111,20 @@ button:hover {
   font-size: 0.85rem;
 }
 
+.list-code {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: -8px 0 12px;
+}
+
+.list-code code {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  user-select: all; /* ein Tipp markiert den ganzen Code */
+}
+
 #items {
   list-style: none;
   padding: 0;

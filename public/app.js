@@ -150,6 +150,17 @@ $("#create-form").addEventListener("submit", async (e) => {
   location.href = `/list/${list.id}`;
 });
 
+$("#open-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  // Auch komplette Links akzeptieren, nicht nur den nackten Code
+  const input = $("#open-code").value.trim().toLowerCase();
+  const code = input.split("/list/").pop().replace(/[^a-z0-9_-]/g, "");
+  if (!code) return;
+  const res = await fetch(`/api/lists/${code}`);
+  if (!res.ok) return alert("Diesen Listen-Code gibt es nicht.");
+  location.href = `/list/${code}`;
+});
+
 // ---------- Listenansicht ----------
 
 async function openList(listId) {
@@ -166,6 +177,7 @@ async function openList(listId) {
   rememberList(listId, list.name);
 
   $("#list-name").textContent = list.name;
+  $("#list-code").textContent = listId;
   $("#view-list").hidden = false;
   renderItems();
   connectWebSocket();
