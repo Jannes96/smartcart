@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SmartCart – Geteilte Einkaufsliste</title>
+  <meta name="theme-color" content="#2e7d32" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="SmartCart" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main id="app">
+    <!-- Startansicht: neue Liste anlegen -->
+    <section id="view-home" hidden>
+      <h1>🛒 SmartCart</h1>
+      <p>Erstelle eine Einkaufsliste und teile den Link – alle sehen Änderungen sofort.</p>
+      <form id="create-form">
+        <input id="create-name" type="text" placeholder="Name der Liste (optional)" />
+        <button type="submit">Liste erstellen</button>
+      </form>
+
+      <div id="my-lists" hidden>
+        <h2>Deine Listen</h2>
+        <ul id="my-lists-items"></ul>
+      </div>
+
+      <div id="sync">
+        <h2>Geräte-Sync</h2>
+        <div id="sync-off" hidden>
+          <p>Zeige deine Listen auf allen Geräten: Erstelle einen Sync-Code und gib ihn auf dem anderen Gerät ein.</p>
+          <button id="sync-create">Sync-Code erstellen</button>
+          <form id="sync-join">
+            <input id="sync-code-input" type="text" placeholder="Code eingeben, z.B. tiger-fluss-47" autocomplete="off" />
+            <button type="submit">Verbinden</button>
+          </form>
+        </div>
+        <div id="sync-on" hidden>
+          <p>Verbunden mit Code <code id="sync-code-display"></code></p>
+          <div class="sync-actions">
+            <button id="sync-copy">Code kopieren</button>
+            <button id="sync-leave">Trennen</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Listenansicht -->
+    <section id="view-list" hidden>
+      <header>
+        <h1 id="list-name"></h1>
+        <button id="share-btn" title="Link kopieren">🔗 Teilen</button>
+      </header>
+
+      <form id="add-form">
+        <input id="add-name" type="text" placeholder="Was brauchst du?" autocomplete="off" required />
+        <input id="add-qty" type="text" placeholder="Menge" autocomplete="off" />
+        <button type="submit">+</button>
+      </form>
+
+      <ul id="items"></ul>
+
+      <footer>
+        <button id="clear-btn">Abgehakte entfernen</button>
+        <span id="status" class="status"></span>
+      </footer>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+# fly.toml – Konfiguration für Fly.io
+
+app = "smartcart-jannes"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  DATABASE_PATH = "/data/smartcart.db"
+
+# SQLite liegt auf einem persistenten Volume.
+# Vor dem ersten Deploy anlegen: fly volumes create smartcart_data --region fra --size 1
+[mounts]
+  source = "smartcart_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  # WICHTIG: genau 1 Maschine, da SQLite lokal liegt und WebSockets
+  # In-Memory-State halten. Nicht horizontal skalieren!
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+[checks]
+  [checks.health]
+    type = "http"
+    port = 8080
+    path = "/healthz"
+    interval = "30s"
+    timeout = "5s"
