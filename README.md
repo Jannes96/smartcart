@@ -44,12 +44,12 @@ Subscribe/Broadcast-Modell, optimistische UI im Frontend.
 
 | | |
 |---|---|
-| ⚡ **Echtzeit-Sync** | Änderungen landen über WebSockets sofort bei allen, die dieselbe Liste offen haben |
-| 🔗 **Teilen per Link oder Code** | Jede Liste hat eine ID wie `k3v9x2mq` – als URL teilen oder auf der Startseite eintippen |
-| 🔓 **Kein Login** | Keine Accounts, keine E-Mail, keine Passwörter |
-| 📱 **PWA & offline** | Installierbar auf iOS/Android; Service Worker cacht die App-Shell und die zuletzt geladenen Listen |
-| 🔄 **Geräte-Sync** | Optionaler Sync-Code (`tiger-apfel-50`) hält die Listen-Übersicht über mehrere eigene Geräte synchron |
-| 🪶 **Kein Build-Step** | Vanilla JS im Frontend, drei Dependencies im Backend, ein Container |
+| **Echtzeit-Sync** | Änderungen landen über WebSockets sofort bei allen, die dieselbe Liste offen haben |
+| **Teilen per Link oder Code** | Jede Liste hat eine ID wie `k3v9x2mq` – als URL teilen oder auf der Startseite eintippen |
+| **Kein Login** | Keine Accounts, keine E-Mail, keine Passwörter |
+| **PWA & offline** | Installierbar auf iOS/Android; Service Worker cacht die App-Shell und die zuletzt geladenen Listen |
+| **Geräte-Sync** | Optionaler Sync-Code (`tiger-apfel-50`) hält die Listen-Übersicht über mehrere eigene Geräte synchron |
+| **Kein Build-Step** | Vanilla JS im Frontend, drei Dependencies im Backend, ein Container |
 
 ## Stack & Architektur
 
