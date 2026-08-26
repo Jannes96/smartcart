@@ -1,13 +1,34 @@
 {
   "name": "smartcart",
-  "version": "0.1.0",
-  "description": "Geteilte Einkaufsliste mit Echtzeit-Sync",
+  "version": "1.0.0",
+  "description": "Geteilte Einkaufsliste mit Echtzeit-Sync über WebSockets – ohne Login, als installierbare PWA",
   "type": "module",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "node --watch server/index.js"
+    "dev": "node --watch server/index.js",
+    "test": "node --test \"test/**/*.test.js\""
   },
+  "keywords": [
+    "shopping-list",
+    "realtime",
+    "websockets",
+    "express",
+    "sqlite",
+    "pwa",
+    "offline-first",
+    "fly-io"
+  ],
+  "author": "Jannes Wilkesmann (https://github.com/Jannes96)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jannes96/smartcart.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jannes96/smartcart/issues"
+  },
+  "homepage": "https://github.com/Jannes96/smartcart#readme",
   "engines": {
     "node": ">=22"
   },
