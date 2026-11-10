@@ -1,3 +1,5 @@
+import { CATEGORIES, DEFAULT_CATEGORY, categoryOr } from "/categories.js";
+
 const $ = (sel) => document.querySelector(sel);
 
 const state = {
@@ -189,35 +191,93 @@ async function openList(listId) {
   $("#list-name").textContent = list.name;
   $("#list-code").textContent = listId;
   $("#view-list").hidden = false;
+  fillCategorySelect($("#add-category"), DEFAULT_CATEGORY);
   renderItems();
   connectWebSocket();
+}
+
+// Füllt ein <select> mit allen Kategorien.
+function fillCategorySelect(select, selected) {
+  select.innerHTML = "";
+  for (const cat of CATEGORIES) {
+    const option = document.createElement("option");
+    option.value = cat.id;
+    option.textContent = `${cat.icon} ${cat.label}`;
+    option.selected = cat.id === selected;
+    select.appendChild(option);
+  }
+}
+
+// Die Kategorie eines Items: ein Emoji-Chip, hinter dem unsichtbar ein echtes
+// <select> liegt. So bleibt die Zeile schmal, der Nutzer bekommt aber den
+// nativen Auswahldialog mit den vollen Bezeichnungen.
+function categoryChip(item) {
+  const cat = categoryOr(item.category);
+  const chip = document.createElement("span");
+  chip.className = "cat-chip";
+  chip.title = `Kategorie: ${cat.label}`;
+
+  const icon = document.createElement("span");
+  icon.textContent = cat.icon;
+  icon.setAttribute("aria-hidden", "true");
+
+  const select = document.createElement("select");
+  select.setAttribute("aria-label", `Kategorie von ${item.name} ändern`);
+  fillCategorySelect(select, cat.id);
+  select.addEventListener("change", () => changeCategory(item, select.value));
+
+  chip.append(icon, select);
+  return chip;
 }
 
 function renderItems() {
   const ul = $("#items");
   ul.innerHTML = "";
-  for (const item of state.items) {
-    const li = document.createElement("li");
-    li.className = item.checked ? "checked" : "";
 
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = !!item.checked;
-    checkbox.addEventListener("change", () => toggleItem(item, checkbox.checked));
+  for (const cat of CATEGORIES) {
+    // state.items liefert der Server als "offen zuerst, dann abgehakt";
+    // das Filtern erhält diese Reihenfolge innerhalb der Gruppe.
+    const items = state.items.filter((i) => categoryOr(i.category).id === cat.id);
+    if (!items.length) continue;
 
-    const text = document.createElement("span");
-    text.textContent = item.quantity ? `${item.name} (${item.quantity})` : item.name;
+    const head = document.createElement("li");
+    head.className = "cat-head";
+    const open = items.filter((i) => !i.checked).length;
+    const title = document.createElement("span");
+    title.className = "cat-title";
+    const titleIcon = document.createElement("span");
+    titleIcon.textContent = cat.icon;
+    titleIcon.setAttribute("aria-hidden", "true");
+    title.append(titleIcon, cat.label);
+    const count = document.createElement("span");
+    count.className = "cat-count";
+    count.textContent = `${open}/${items.length}`;
+    head.append(title, count);
+    ul.appendChild(head);
 
-    label.append(checkbox, text);
+    for (const item of items) {
+      const li = document.createElement("li");
+      li.className = item.checked ? "checked" : "";
 
-    const del = document.createElement("button");
-    del.className = "delete";
-    del.textContent = "×";
-    del.addEventListener("click", () => deleteItem(item));
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = !!item.checked;
+      checkbox.addEventListener("change", () => toggleItem(item, checkbox.checked));
 
-    li.append(label, del);
-    ul.appendChild(li);
+      const text = document.createElement("span");
+      text.textContent = item.quantity ? `${item.name} (${item.quantity})` : item.name;
+
+      label.append(checkbox, text);
+
+      const del = document.createElement("button");
+      del.className = "delete";
+      del.textContent = "×";
+      del.addEventListener("click", () => deleteItem(item));
+
+      li.append(label, categoryChip(item), del);
+      ul.appendChild(li);
+    }
   }
 }
 
@@ -228,10 +288,15 @@ $("#add-form").addEventListener("submit", async (e) => {
   await fetch(`/api/lists/${state.listId}/items`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, quantity: $("#add-qty").value }),
+    body: JSON.stringify({
+      name,
+      quantity: $("#add-qty").value,
+      category: $("#add-category").value,
+    }),
   });
   $("#add-name").value = "";
   $("#add-qty").value = "";
+  // Die Kategorie bleibt stehen: wer Obst einträgt, trägt meist mehr davon ein.
   $("#add-name").focus();
 });
 
@@ -240,6 +305,14 @@ async function toggleItem(item, checked) {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ checked }),
+  });
+}
+
+async function changeCategory(item, category) {
+  await fetch(`/api/lists/${state.listId}/items/${item.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ category }),
   });
 }
 

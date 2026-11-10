@@ -22,6 +22,7 @@ db.exec(`
     list_id    TEXT NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
     name       TEXT NOT NULL,
     quantity   TEXT,
+    category   TEXT NOT NULL DEFAULT 'sonstiges',
     checked    INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -40,5 +41,13 @@ db.exec(`
     PRIMARY KEY (profile_code, list_id)
   );
 `);
+
+// ---- Migrationen für bereits bestehende Datenbanken ----
+// CREATE TABLE IF NOT EXISTS lässt alte Tabellen unangetastet, fehlende Spalten
+// müssen deshalb nachgezogen werden.
+const itemColumns = db.prepare("PRAGMA table_info(items)").all().map((c) => c.name);
+if (!itemColumns.includes("category")) {
+  db.exec("ALTER TABLE items ADD COLUMN category TEXT NOT NULL DEFAULT 'sonstiges'");
+}
 
 export default db;

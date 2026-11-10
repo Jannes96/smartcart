@@ -46,6 +46,7 @@ Subscribe/Broadcast-Modell, optimistische UI im Frontend.
 |---|---|
 | ⚡ **Echtzeit-Sync** | Änderungen landen über WebSockets sofort bei allen, die dieselbe Liste offen haben |
 | 🔗 **Teilen per Link oder Code** | Jede Liste hat eine ID wie `k3v9x2mq` – als URL teilen oder auf der Startseite eintippen |
+| 🗂️ **Kategorien** | Artikel lassen sich einsortieren (Obst & Gemüse, Molkerei, Tiefkühl …); die Liste gruppiert sich danach |
 | 🔓 **Kein Login** | Keine Accounts, keine E-Mail, keine Passwörter |
 | 📱 **PWA & offline** | Installierbar auf iOS/Android; Service Worker cacht die App-Shell und die zuletzt geladenen Listen |
 | 🔄 **Geräte-Sync** | Optionaler Sync-Code (`tiger-apfel-50`) hält die Listen-Übersicht über mehrere eigene Geräte synchron |
@@ -81,6 +82,8 @@ Browser (Vanilla JS, PWA)
 | **SQLite statt Postgres** | Bei dieser Last ist ein Netzwerk-Hop pro Query pure Latenz. `better-sqlite3` ist synchron und damit ohne `await`-Rauschen im Code | Bindet die App an **eine** Maschine |
 | **Kein Frontend-Framework** | ~330 Zeilen `app.js` reichen für diese UI. Kein Bundler heißt: Datei ändern, F5, fertig | Kein Komponentenmodell, wenn die App wächst |
 | **Kein Auth** | Die Liste *ist* die URL. Auth wäre mehr Code als das Produkt | Wer den Link hat, darf alles (siehe unten) |
+| **Kategorien in Laufweg-Reihenfolge** | Die Gruppen stehen in der Reihenfolge, in der man den Supermarkt abläuft – nicht alphabetisch. Das ist der ganze Zweck der Funktion: oben Obst & Gemüse, unten Haushalt | Passt nicht zu jedem Laden |
+| **Kategorie manuell statt geraten** | Ein Wörterbuch, das „Kokosmilch" unter Molkerei einsortiert, ärgert mehr als es hilft. Ein Dropdown liegt immer richtig | Ein Klick mehr pro Artikel |
 | **ID mit 8 Zeichen aus 36** | ~2,8 Billionen Kombinationen, `crypto.randomBytes` – nicht erratbar, aber noch abtippbar | Keine Sperre gegen systematisches Durchprobieren |
 
 ### Sicherheitsmodell (ehrlich)
@@ -144,8 +147,8 @@ Alle Antworten sind JSON; Schreiboperationen lösen zusätzlich ein WebSocket-Ev
 | `POST` | `/api/lists` | Liste anlegen `{ name? }` | – |
 | `GET` | `/api/lists/:id` | Liste inkl. Items laden | – |
 | `DELETE` | `/api/lists/:id` | Liste endgültig löschen | `list:deleted` |
-| `POST` | `/api/lists/:id/items` | Item hinzufügen `{ name, quantity? }` | `item:added` |
-| `PATCH` | `/api/lists/:id/items/:itemId` | Item ändern `{ checked?, name? }` | `item:updated` |
+| `POST` | `/api/lists/:id/items` | Item hinzufügen `{ name, quantity?, category? }` | `item:added` |
+| `PATCH` | `/api/lists/:id/items/:itemId` | Item ändern `{ checked?, name?, category? }` | `item:updated` |
 | `DELETE` | `/api/lists/:id/items/:itemId` | Item löschen | `item:deleted` |
 | `DELETE` | `/api/lists/:id/items` | Alle abgehakten Items entfernen | `list:cleared` |
 | `POST` | `/api/profiles` | Sync-Profil anlegen → `{ code }` | – |
@@ -153,6 +156,12 @@ Alle Antworten sind JSON; Schreiboperationen lösen zusätzlich ein WebSocket-Ev
 | `PUT` | `/api/profiles/:code/lists/:listId` | Liste zum Profil hinzufügen (idempotent) | – |
 | `DELETE` | `/api/profiles/:code/lists/:listId` | Liste aus dem Profil entfernen | – |
 | `GET` | `/healthz` | Health-Check für Fly.io | – |
+
+Gültige Werte für `category` definiert [public/categories.js](public/categories.js) – die
+Datei ist die einzige Quelle der Wahrheit und wird sowohl vom Server (Validierung)
+als auch vom Browser (Dropdowns, Gruppierung) importiert. Unbekannte Werte werden
+still auf `sonstiges` bzw. den bisherigen Wert zurückgesetzt, damit ein veralteter
+Client kein Item unbrauchbar machen kann.
 
 ### WebSocket
 
@@ -178,6 +187,7 @@ Der Server hält pro Liste ein `Set` von Sockets und räumt es beim `close` auf.
 ├── public/                 # Frontend ohne Build-Step
 │   ├── index.html          # Beide Views (Übersicht + Liste), per hidden umgeschaltet
 │   ├── app.js              # State, Rendering, REST-Calls, WebSocket-Handling
+│   ├── categories.js       # Kategorien – von Server UND Browser importiert
 │   ├── style.css
 │   ├── sw.js               # Service Worker: App-Shell cache-first, API network-first
 │   ├── manifest.json
@@ -199,6 +209,8 @@ Der Server hält pro Liste ein `Set` von Sockets und räumt es beim `close` auf.
 - [ ] Optimistisches Rendering auch bei Verbindungsverlust (Outbox-Queue im Service Worker)
 - [ ] Ablaufdatum für unbenutzte Listen (DSGVO-Datensparsamkeit)
 - [ ] Mengen als strukturierte Felder statt Freitext, damit sich Listen zusammenführen lassen
+- [ ] Kategorie-Vorschlag beim Tippen (Wörterbuch), weiterhin überschreibbar
+- [ ] Eigene Kategorien pro Liste, für Läden mit anderem Zuschnitt
 - [ ] Postgres + Redis-Pub/Sub als Pfad zur horizontalen Skalierung
 
 ## Lizenz

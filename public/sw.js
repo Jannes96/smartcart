@@ -1,10 +1,11 @@
 // Bei jedem Deploy mit geänderten Assets hochzählen, damit Clients den neuen Stand bekommen
-const CACHE_VERSION = "smartcart-v7";
+const CACHE_VERSION = "smartcart-v8";
 
 const APP_SHELL = [
   "/",
   "/index.html",
   "/app.js",
+  "/categories.js",
   "/style.css",
   "/manifest.json",
   "/icons/icon-192.png",

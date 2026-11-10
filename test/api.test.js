@@ -104,6 +104,79 @@ describe("Listen-API", () => {
   });
 });
 
+describe("Kategorien", () => {
+  it("vergibt ohne Angabe die Default-Kategorie", async () => {
+    const { body: list } = await api("/api/lists", { method: "POST", body: "{}" });
+    const { body: item } = await api(`/api/lists/${list.id}/items`, {
+      method: "POST",
+      body: JSON.stringify({ name: "Irgendwas" }),
+    });
+    assert.equal(item.category, "sonstiges");
+  });
+
+  it("übernimmt eine gültige Kategorie beim Anlegen", async () => {
+    const { body: list } = await api("/api/lists", { method: "POST", body: "{}" });
+    const { body: item } = await api(`/api/lists/${list.id}/items`, {
+      method: "POST",
+      body: JSON.stringify({ name: "Äpfel", category: "obst-gemuese" }),
+    });
+    assert.equal(item.category, "obst-gemuese");
+
+    const { body: reloaded } = await api(`/api/lists/${list.id}`);
+    assert.equal(reloaded.items[0].category, "obst-gemuese");
+  });
+
+  it("ändert die Kategorie per PATCH", async () => {
+    const { body: list } = await api("/api/lists", { method: "POST", body: "{}" });
+    const { body: item } = await api(`/api/lists/${list.id}/items`, {
+      method: "POST",
+      body: JSON.stringify({ name: "Kokosmilch", category: "molkerei" }),
+    });
+
+    const { body: patched } = await api(`/api/lists/${list.id}/items/${item.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ category: "vorrat" }),
+    });
+    assert.equal(patched.category, "vorrat");
+    // Der Name darf durch ein reines Kategorie-Update nicht verloren gehen
+    assert.equal(patched.name, "Kokosmilch");
+  });
+
+  it("fällt bei unbekannter Kategorie auf den bisherigen Wert zurück", async () => {
+    const { body: list } = await api("/api/lists", { method: "POST", body: "{}" });
+    const { body: item } = await api(`/api/lists/${list.id}/items`, {
+      method: "POST",
+      body: JSON.stringify({ name: "Brot", category: "backwaren" }),
+    });
+
+    const neu = await api(`/api/lists/${list.id}/items`, {
+      method: "POST",
+      body: JSON.stringify({ name: "Unfug", category: "gibtsnicht" }),
+    });
+    assert.equal(neu.body.category, "sonstiges");
+
+    const { body: patched } = await api(`/api/lists/${list.id}/items/${item.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ category: "<script>" }),
+    });
+    assert.equal(patched.category, "backwaren");
+  });
+
+  it("lässt das Abhaken die Kategorie unberührt", async () => {
+    const { body: list } = await api("/api/lists", { method: "POST", body: "{}" });
+    const { body: item } = await api(`/api/lists/${list.id}/items`, {
+      method: "POST",
+      body: JSON.stringify({ name: "Eier", category: "molkerei" }),
+    });
+    const { body: patched } = await api(`/api/lists/${list.id}/items/${item.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ checked: true }),
+    });
+    assert.equal(patched.checked, 1);
+    assert.equal(patched.category, "molkerei");
+  });
+});
+
 describe("Sync-Profile", () => {
   it("verknüpft Listen mit einem Sync-Code", async () => {
     const { body: profile } = await api("/api/profiles", { method: "POST" });

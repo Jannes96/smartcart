@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "node:crypto";
 import db from "../db.js";
 import { broadcast } from "../ws.js";
+import { DEFAULT_CATEGORY, isCategory } from "../../public/categories.js";
 
 const router = Router();
 
@@ -52,9 +53,10 @@ router.post("/:id/items", (req, res) => {
   const name = (req.body?.name ?? "").trim();
   if (!name) return res.status(400).json({ error: "Name fehlt" });
   const quantity = (req.body?.quantity ?? "").trim() || null;
+  const category = isCategory(req.body?.category) ? req.body.category : DEFAULT_CATEGORY;
   const info = db
-    .prepare("INSERT INTO items (list_id, name, quantity) VALUES (?, ?, ?)")
-    .run(list.id, name, quantity);
+    .prepare("INSERT INTO items (list_id, name, quantity, category) VALUES (?, ?, ?, ?)")
+    .run(list.id, name, quantity, category);
   const item = db.prepare("SELECT * FROM items WHERE id = ?").get(info.lastInsertRowid);
   broadcast(list.id, { type: "item:added", item });
   res.status(201).json(item);
@@ -71,7 +73,11 @@ router.patch("/:id/items/:itemId", (req, res) => {
 
   const checked = req.body?.checked !== undefined ? (req.body.checked ? 1 : 0) : item.checked;
   const name = (req.body?.name ?? item.name).trim() || item.name;
-  db.prepare("UPDATE items SET checked = ?, name = ? WHERE id = ?").run(checked, name, item.id);
+  // Unbekannte Kategorien werden ignoriert statt abgelehnt – ein veralteter
+  // Client soll ein Item nicht unabhakbar machen.
+  const category = isCategory(req.body?.category) ? req.body.category : item.category;
+  db.prepare("UPDATE items SET checked = ?, name = ?, category = ? WHERE id = ?")
+    .run(checked, name, category, item.id);
 
   const updated = db.prepare("SELECT * FROM items WHERE id = ?").get(item.id);
   broadcast(list.id, { type: "item:updated", item: updated });
